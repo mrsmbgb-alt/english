@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Progress - English Learning Platform</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/assets/js/ad-manager.js" defer></script>
+    <script src="/assets/js/api.js" defer></script>
+    <script src="/assets/js/auth.js" defer></script>
+    <script src="/assets/js/app.js" defer></script>
+    
+    <style>
+        .day-card {
+            transition: all 0.2s;
+        }
+        
+        .day-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .day-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .day-card.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .day-card.current {
+            border-color: #8b5cf6;
+            background: #faf5ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Header Ad -->
+    <div data-ad-slot="header"></div>
+    
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-purple-600">EnglishBD</a>
+            <div id="nav-auth"></div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        
+        <div id="progress-container">
+            <!-- Loading -->
+            <div class="flex justify-center items-center py-24">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- In-Content Ad -->
+    <div data-ad-slot="in_content" class="container mx-auto px-4 my-8"></div>
+    
+    <!-- Footer Ad -->
+    <div data-ad-slot="footer" class="bg-gray-100 py-4 mt-12"></div>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2024 EnglishBD. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- Sticky Bottom Ad (Mobile) -->
+    <div data-ad-slot="sticky_bottom" class="lg:hidden"></div>
+    
+    <script>
+        async function init() {
+            const user = await Auth.requireLogin();
+            if (!user) return;
+            
+            initNav(user);
+            
+            const slug = App.getUrlParam('slug');
+            if (!slug) {
+                window.location.href = '/dashboard.html';
+                return;
+            }
+            
+            await loadProgress(slug);
+        }
+        
+        function initNav(user) {
+            const navAuth = document.getElementById('nav-auth');
+            navAuth.innerHTML = `
+                <a href="/dashboard.html" class="text-gray-700 hover:text-purple-600">← Dashboard</a>
+                <button onclick="Auth.logout()" class="text-gray-700 hover:text-purple-600">Logout</button>
+            `;
+        }
+        
+        async function loadProgress(slug) {
+            const container = document.getElementById('progress-container');
+            
+            try {
+                const response = await API.progress.course(slug);
+                const { course, enrollment, progress, lessons } = response.data;
+                
+                container.innerHTML = `
+                    <!-- Course Header -->
+                    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 class="text-3xl font-bold mb-2">${App.escapeHtml(course.title)}</h1>
+                                <p class="text-gray-600">Track your learning progress</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-4xl font-bold text-purple-600">${progress.percentage}%</div>
+                                <div class="text-sm text-gray-600">Complete</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-6">
+                            <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-purple-600 to-blue-500 transition-all duration-500" style="width: ${progress.percentage}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-green-600">${progress.completed_days}</div>
+                                <div class="text-sm text-gray-600">Completed</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">${progress.total_days - progress.completed_days}</div>
+                                <div class="text-sm text-gray-600">Remaining</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-purple-600">${progress.total_days}</div>
+                                <div class="text-sm text-gray-600">Total Days</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lessons Grid -->
+                    <div class="mb-4">
+                        <h2 class="text-2xl font-bold mb-6">All Lessons</h2>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${lessons.map(lesson => renderLessonCard(lesson, course.slug)).join('')}
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <p class="text-red-500 mb-4">${error.message || 'Failed to load progress'}</p>
+                        <a href="/dashboard.html" class="text-purple-600 hover:underline">← Back to Dashboard</a>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderLessonCard(lesson, courseSlug) {
+            const completed = lesson.lesson_completed && lesson.quiz_passed;
+            const locked = lesson.is_locked;
+            const current = !completed && !locked;
+            
+            let cardClass = 'day-card border-2 rounded-lg p-4 ';
+            if (completed) cardClass += 'completed';
+            else if (current) cardClass += 'current';
+            else if (locked) cardClass += 'locked border-gray-200';
+            else cardClass += 'border-gray-200';
+            
+            const clickHandler = locked ? '' : `onclick="location.href='/lesson.html?slug=${courseSlug}&day=${lesson.day_number}'"`;
+            
+            return `
+                <div class="${cardClass}" ${clickHandler} style="cursor: ${locked ? 'not-allowed' : 'pointer'}">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                                completed ? 'bg-green-500 text-white' :
+                                current ? 'bg-purple-500 text-white' :
+                                'bg-gray-200 text-gray-500'
+                            }">
+                                ${locked ? '🔒' : lesson.day_number}
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-sm">${App.escapeHtml(lesson.title)}</h3>
+                                <p class="text-xs text-gray-500">${lesson.estimated_minutes || 15} min</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${!locked && lesson.lesson_completed ? `
+                        <div class="flex items-center justify-between text-sm mt-2 pt-2 border-t">
+                            <span class="${lesson.quiz_passed ? 'text-green-600' : 'text-orange-600'}">
+                                ${lesson.quiz_passed ? '✓ Quiz Passed' : '⚠ Retry Quiz'}
+                            </span>
+                            ${lesson.quiz_score !== null ? `<span class="font-semibold">${lesson.quiz_score}%</span>` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    ${locked ? '<div class="text-xs text-gray-500 mt-2">Complete previous day first</div>' : ''}
+                    
+                    ${current ? '<div class="text-xs text-purple-600 font-semibold mt-2">→ Continue here</div>' : ''}
+                </div>
+            `;
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
