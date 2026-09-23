@@ -1,7 +1,0 @@
-# SPA-style routing
-/lesson/:slug/:day  /lesson.html?slug=:slug&day=:day  200
-/quiz/:slug/:day    /quiz.html?slug=:slug&day=:day    200
-/course/:slug       /course-detail.html?slug=:slug    200
-
-# Fallback to index
-/*  /index.html  200
