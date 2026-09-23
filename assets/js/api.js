@@ -6,7 +6,7 @@
   'use strict';
 
   // Example: https://your-backend-domain.com/backend
-  const API_BASE = window.__ELP_API_BASE || 'https://your-backend-domain.com/backend';
+  const API_BASE = window.__ELP_API_BASE || 'https://englishbd.infinityfreeapp.com/backend';
 
   const toUrl = (path) => {
     if (!path.startsWith('/')) path = '/' + path;
