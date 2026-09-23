@@ -1,0 +1,50 @@
+<!-- templates/layout.html (reference template)
+  Bangla: This is a reusable layout sample. Pages in this project are plain HTML files.
+  Future: You can convert to a build step (static generator) if needed.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{title}}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+  <script src="/assets/js/ad-manager.js" defer></script>
+  <script src="/assets/js/api.js" defer></script>
+  <script src="/assets/js/auth.js" defer></script>
+  <script src="/assets/js/app.js" defer></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="container-page px-4 py-3 flex items-center justify-between">
+      <a href="/" class="font-bold text-lg">English Platform</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/courses.html" class="hover:underline">Courses</a>
+        <a href="/dashboard.html" class="hover:underline auth-only hidden">Dashboard</a>
+        <a href="/login.html" class="hover:underline guest-only">Login</a>
+        <a href="/register.html" class="hover:underline guest-only">Register</a>
+        <button class="auth-only hidden px-3 py-1 rounded bg-slate-900 text-white" id="logoutBtn">Logout</button>
+      </nav>
+    </div>
+    <div class="container-page px-4 pb-3">
+      <div class="ad-slot" data-ad-slot="header"></div>
+    </div>
+  </header>
+
+  <main class="container-page px-4 py-4">
+    <div class="layout-grid">
+      <aside class="sidebar-left"></aside>
+      <section class="content">
+        {{content}}
+      </section>
+      <aside class="sidebar-right"></aside>
+    </div>
+  </main>
+
+  <div class="sticky-bottom-wrap">
+    <div class="ad-slot sticky-bottom-ad" data-ad-slot="sticky_bottom"></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — English Platform</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+
+  <script src="/assets/js/ad-manager.js" defer></script>
+  <script src="/assets/js/api.js" defer></script>
+  <script src="/assets/js/auth.js" defer></script>
+  <script src="/assets/js/app.js" defer></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="container-page px-4 py-3 flex items-center justify-between">
+      <a href="/" class="font-bold text-lg">English Platform</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/courses.html" class="hover:underline">Courses</a>
+        <a href="/register.html" class="hover:underline">Register</a>
+      </nav>
+    </div>
+    <div class="container-page px-4 pb-3">
+      <div class="ad-slot" data-ad-slot="header"></div>
+    </div>
+  </header>
+
+  <main class="container-page px-4 py-6">
+    <div class="layout-grid">
+      <aside class="sidebar-left"></aside>
+
+      <section class="content">
+        <article class="p-4 rounded bg-white border border-slate-200 max-w-xl">
+          <h1 class="text-xl font-bold">Login</h1>
+          <p class="text-sm text-slate-600 mt-1">Bangla: আপনার email + password দিয়ে লগইন করুন।</p>
+
+          <div id="alert" class="hidden mt-4 p-3 rounded text-sm"></div>
+
+          <form id="loginForm" class="mt-4 space-y-3">
+            <div>
+              <label class="text-sm">Email</label>
+              <input name="email" type="email" required
+                     class="w-full px-3 py-2 rounded bg-slate-50 border border-slate-200" />
+            </div>
+
+            <div>
+              <label class="text-sm">Password</label>
+              <input name="password" type="password" required
+                     class="w-full px-3 py-2 rounded bg-slate-50 border border-slate-200" />
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="remember" class="accent-blue-600" />
+                Remember me (30 days)
+              </label>
+              <a href="#" class="text-sm text-blue-700 hover:underline" id="forgotBtn">Forgot?</a>
+            </div>
+
+            <button class="w-full px-4 py-2 rounded bg-blue-600 text-white">Login</button>
+          </form>
+
+          <div class="mt-4 text-sm">
+            New user? <a class="text-blue-700 hover:underline" href="/register.html">Register</a>
+          </div>
+
+          <div class="mt-4 ad-slot" data-ad-slot="in_content" data-ad-index="0"></div>
+        </article>
+
+        <div class="mt-4 ad-slot" data-ad-slot="footer"></div>
+      </section>
+
+      <aside class="sidebar-right">
+        <div class="ad-slot" data-ad-slot="sidebar_top"></div>
+        <div class="mt-4 ad-slot" data-ad-slot="sidebar_bottom"></div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="sticky-bottom-wrap">
+    <div class="ad-slot sticky-bottom-ad" data-ad-slot="sticky_bottom"></div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      window.AdManager?.init?.();
+
+      const form = document.getElementById('loginForm');
+      const alertBox = document.getElementById('alert');
+
+      const show = (ok, msg) => {
+        alertBox.className = 'mt-4 p-3 rounded text-sm ' + (ok ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900');
+        alertBox.textContent = msg;
+        alertBox.classList.remove('hidden');
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.classList.add('hidden');
+
+        const fd = new FormData(form);
+        const payload = {
+          email: fd.get('email'),
+          password: fd.get('password'),
+          remember: fd.get('remember') ? true : false
+        };
+
+        try {
+          const res = await window.Auth.login(payload);
+          if (!res?.success) return show(false, res?.message || 'Login failed');
+          show(true, 'Login success. Redirecting...');
+          setTimeout(() => location.href = '/dashboard.html', 600);
+        } catch (err) {
+          show(false, 'Network error');
+        }
+      });
+
+      document.getElementById('forgotBtn').addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const email = (new FormData(form)).get('email');
+        if (!email) return show(false, 'Please enter your email first');
+
+        try {
+          const r = await window.API.post('/api/auth/forgot-password.php', { email });
+          show(true, r?.message || 'If the email exists, reset instructions will be sent.');
+        } catch (e) {
+          show(true, 'If the email exists, reset instructions will be sent.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Cloudflare Pages redirects (SPA-style routes for lesson/quiz)
+# Bangla: /lesson/slug/1 -> lesson.html? (JS reads path)
+# Use 200 rewrite to serve the static file.
+
+ /lesson/*   /lesson.html   200
+ /quiz/*     /quiz.html     200
+
+# Optional friendly paths
+ /dashboard  /dashboard.html 200
+ /courses    /courses.html   200
+ /progress   /progress.html  200

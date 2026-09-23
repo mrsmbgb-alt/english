@@ -1,0 +1,117 @@
+/* responsive.css — 4 breakpoints exactly per spec
+   Desktop ≥1280px: 3-column (left 240 + content 800 + right 300)
+   Laptop 1024–1279px: 2-column (content + right 300), left hidden
+   Tablet 768–1023px: 1-column centered, sidebars hidden, sidebar ads OFF
+   Mobile <768px: 1-column, body padding-bottom:60px, sticky_bottom fixed
+*/
+
+/* Defaults (mobile-first) */
+.layout-grid {
+  grid-template-columns: 1fr;
+}
+
+.sidebar-left,
+.sidebar-right {
+  display: none;
+}
+
+/* ✅ Mobile sticky bottom fixed */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: 60px; /* NON-NEGOTIABLE */
+  }
+
+  .sticky-bottom-wrap {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,.96);
+    border-top: 1px solid #e2e8f0;
+    backdrop-filter: blur(6px);
+  }
+
+  .sticky-bottom-ad {
+    min-height: 60px; /* placeholder; ad-manager will set exact min-height inline */
+  }
+}
+
+/* Tablet: 768–1023 — 1 column centered; sidebars hidden; sidebar ads OFF */
+@media (min-width: 768px) and (max-width: 1023px) {
+  body { padding-bottom: 0; }
+
+  .layout-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .content {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .sidebar-left,
+  .sidebar-right {
+    display: none; /* Sidebar ads OFF */
+  }
+
+  .sticky-bottom-wrap {
+    display: none; /* sticky bottom only mobile */
+  }
+}
+
+/* Laptop: 1024–1279 — content + right sidebar */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  body { padding-bottom: 0; }
+
+  .layout-grid {
+    grid-template-columns: 1fr 300px;
+    align-items: start;
+  }
+
+  .sidebar-left {
+    display: none; /* Left hidden */
+  }
+
+  .sidebar-right {
+    display: block;
+    width: 300px;
+  }
+
+  .content {
+    max-width: 100%;
+  }
+
+  .sticky-bottom-wrap {
+    display: none;
+  }
+}
+
+/* Desktop: ≥1280 — 3 columns fixed widths */
+@media (min-width: 1280px) {
+  body { padding-bottom: 0; }
+
+  .layout-grid {
+    grid-template-columns: 240px 800px 300px;
+    justify-content: center;
+    align-items: start;
+  }
+
+  .sidebar-left {
+    display: block;
+    width: 240px;
+  }
+
+  .content {
+    width: 800px;
+  }
+
+  .sidebar-right {
+    display: block;
+    width: 300px;
+  }
+
+  .sticky-bottom-wrap {
+    display: none;
+  }
+}

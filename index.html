@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Day-by-Day English Learning Platform (BD Students)</title>
+  <meta name="description" content="Day-by-day English learning platform for Bangladeshi students. Lessons + quizzes with progressive unlock." />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+
+  <!-- ✅ Ad Manager (defer, included once) -->
+  <!-- Bangla: Production e apni eta cdn.yourdomain.com e host করতে পারেন -->
+  <script src="/assets/js/ad-manager.js" defer></script>
+
+  <script src="/assets/js/api.js" defer></script>
+  <script src="/assets/js/auth.js" defer></script>
+  <script src="/assets/js/app.js" defer></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="container-page px-4 py-3 flex items-center justify-between">
+      <a href="/" class="font-bold text-lg">English Platform</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/courses.html" class="hover:underline">Courses</a>
+        <a href="/dashboard.html" class="hover:underline auth-only hidden">Dashboard</a>
+        <a href="/login.html" class="hover:underline guest-only">Login</a>
+        <a href="/register.html" class="hover:underline guest-only">Register</a>
+        <button class="auth-only hidden px-3 py-1 rounded bg-slate-900 text-white" id="logoutBtn">Logout</button>
+      </nav>
+    </div>
+
+    <!-- Ad: header (below nav) -->
+    <div class="container-page px-4 pb-3">
+      <div class="ad-slot" data-ad-slot="header"></div>
+    </div>
+  </header>
+
+  <main class="container-page px-4 py-4">
+    <div class="layout-grid">
+      <!-- Left sidebar (desktop only) -->
+      <aside class="sidebar-left">
+        <div class="p-3 rounded bg-white border border-slate-200">
+          <h3 class="font-semibold mb-2">Quick Links</h3>
+          <ul class="text-sm space-y-1">
+            <li><a class="hover:underline" href="/courses.html">Browse Courses</a></li>
+            <li><a class="hover:underline" href="/dashboard.html">My Dashboard</a></li>
+            <li><a class="hover:underline" href="/progress.html">Progress</a></li>
+          </ul>
+          <p class="mt-3 text-xs text-slate-600">Bangla tip: প্রতিদিন ২০ মিনিট practice করলে streak build হবে।</p>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <section class="content">
+        <article class="p-4 rounded bg-white border border-slate-200">
+          <h1 class="text-xl font-bold mb-2">Day-by-Day English Learning (বাংলাদেশি শিক্ষার্থীদের জন্য)</h1>
+          <p class="text-sm text-slate-700">
+            প্রতিদিন ১টা <b>Lesson</b> + ১টা <b>Quiz</b>. Quiz এ <b>≥60%</b> না পেলে next day unlock হবে না।
+          </p>
+
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="p-3 rounded bg-slate-50 border border-slate-200">
+              <div class="font-semibold">Progressive Unlock</div>
+              <div class="text-xs text-slate-600">আগের দিন complete + pass না করলে next day locked 🔒</div>
+            </div>
+            <div class="p-3 rounded bg-slate-50 border border-slate-200">
+              <div class="font-semibold">Mobile-first</div>
+              <div class="text-xs text-slate-600">Low-bandwidth friendly UI</div>
+            </div>
+            <div class="p-3 rounded bg-slate-50 border border-slate-200">
+              <div class="font-semibold">Bangla + English</div>
+              <div class="text-xs text-slate-600">Simple explanations for BD learners</div>
+            </div>
+          </div>
+
+          <!-- In-content ad placeholders -->
+          <div class="mt-4 ad-slot" data-ad-slot="in_content" data-ad-index="0"></div>
+
+          <h2 class="text-lg font-semibold mt-6 mb-2">Featured Courses</h2>
+          <div id="courseList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+          <div class="mt-4 ad-slot" data-ad-slot="in_content" data-ad-index="1"></div>
+
+          <div class="mt-6">
+            <a href="/courses.html" class="inline-block px-4 py-2 rounded bg-blue-600 text-white">Browse All Courses</a>
+          </div>
+        </article>
+
+        <!-- Footer ad -->
+        <div class="mt-4 ad-slot" data-ad-slot="footer"></div>
+      </section>
+
+      <!-- Right sidebar (desktop/laptop only) -->
+      <aside class="sidebar-right">
+        <div class="ad-slot" data-ad-slot="sidebar_top"></div>
+        <div class="mt-4 p-3 rounded bg-white border border-slate-200">
+          <h3 class="font-semibold">How it works</h3>
+          <ol class="text-sm text-slate-700 mt-2 space-y-1 list-decimal list-inside">
+            <li>Enroll course</li>
+            <li>Complete lesson</li>
+            <li>Pass quiz (≥60%)</li>
+            <li>Next day unlock</li>
+          </ol>
+        </div>
+        <div class="mt-4 ad-slot" data-ad-slot="sidebar_bottom"></div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Mobile sticky bottom ad -->
+  <div class="sticky-bottom-wrap">
+    <div class="ad-slot sticky-bottom-ad" data-ad-slot="sticky_bottom"></div>
+  </div>
+
+  <script>
+    // Page-specific init
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Init ads (home page)
+      window.AdManager?.init?.();
+
+      // Load some courses
+      try {
+        const res = await window.API.get('/api/courses/list.php');
+        const list = (res?.data || []).slice(0, 4);
+
+        const el = document.getElementById('courseList');
+        el.innerHTML = list.map(c => `
+          <a href="/course-detail.html?course=${encodeURIComponent(c.slug)}"
+             class="p-3 rounded border border-slate-200 hover:border-blue-400 bg-white block">
+            <div class="font-semibold">${window.App.escapeHtml(c.title)}</div>
+            <div class="text-xs text-slate-600 mt-1">${window.App.escapeHtml(c.short_description || '')}</div>
+            <div class="text-xs text-slate-500 mt-2">Days: ${c.total_days} · Level: ${c.level}</div>
+          </a>
+        `).join('') || '<div class="text-sm text-slate-600">No courses yet.</div>';
+      } catch (e) {
+        // silent
+      }
+    });
+  </script>
+</body>
+</html>

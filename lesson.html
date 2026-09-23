@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lesson — English Platform</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+
+  <script src="/assets/js/ad-manager.js" defer></script>
+  <script src="/assets/js/api.js" defer></script>
+  <script src="/assets/js/auth.js" defer></script>
+  <script src="/assets/js/app.js" defer></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="container-page px-4 py-3 flex items-center justify-between">
+      <a href="/" class="font-bold text-lg">English Platform</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/courses.html" class="hover:underline">Courses</a>
+        <a href="/dashboard.html" class="hover:underline auth-only hidden">Dashboard</a>
+        <a href="/login.html" class="hover:underline guest-only">Login</a>
+        <button class="auth-only hidden px-3 py-1 rounded bg-slate-900 text-white" id="logoutBtn">Logout</button>
+      </nav>
+    </div>
+    <div class="container-page px-4 pb-3">
+      <div class="ad-slot" data-ad-slot="header"></div>
+    </div>
+  </header>
+
+  <!-- Sticky progress header -->
+  <div class="bg-slate-900 text-white sticky top-[56px] z-30">
+    <div class="container-page px-4 py-2 flex items-center justify-between gap-3">
+      <div class="text-sm font-semibold" id="crumb">Lesson</div>
+      <div class="flex-1 max-w-md">
+        <div class="h-2 bg-slate-700 rounded">
+          <div id="progressBar" class="h-2 bg-green-400 rounded" style="width:0%"></div>
+        </div>
+        <div class="text-xs text-slate-200 mt-1" id="progressText">Day — / —</div>
+      </div>
+      <a href="/course-detail.html" id="backCourse" class="text-xs underline">Course</a>
+    </div>
+  </div>
+
+  <main class="container-page px-4 py-4">
+    <div class="layout-grid">
+      <aside class="sidebar-left"></aside>
+
+      <section class="content">
+        <article class="p-4 rounded bg-white border border-slate-200">
+          <div id="alert" class="hidden mb-4 p-3 rounded text-sm"></div>
+
+          <div id="lockedBox" class="hidden p-4 rounded border border-slate-200 bg-slate-50">
+            <h1 class="text-lg font-bold">Locked 🔒</h1>
+            <p class="text-sm text-slate-700 mt-2" id="lockedReason"></p>
+            <div class="mt-3 flex gap-2">
+              <a class="px-3 py-2 rounded bg-slate-900 text-white text-sm" href="/courses.html">Browse Courses</a>
+              <a class="px-3 py-2 rounded bg-blue-600 text-white text-sm" id="goCourseDetail" href="#">Course Detail</a>
+            </div>
+          </div>
+
+          <div id="lessonBox" class="hidden">
+            <h1 id="title" class="text-xl font-bold"></h1>
+
+            <div class="mt-2 flex flex-wrap gap-2 text-xs text-slate-600" id="meta"></div>
+
+            <div class="mt-4 ad-slot" data-ad-slot="in_content" data-ad-index="0"></div>
+
+            <div id="videoWrap" class="hidden mt-4">
+              <div class="aspect-video bg-slate-100 rounded overflow-hidden border border-slate-200">
+                <iframe id="video" class="w-full h-full" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer"></iframe>
+              </div>
+            </div>
+
+            <div id="audioWrap" class="hidden mt-4">
+              <audio id="audio" controls class="w-full"></audio>
+            </div>
+
+            <div id="pdfWrap" class="hidden mt-4">
+              <a id="pdf" class="inline-block px-3 py-2 rounded bg-indigo-600 text-white text-sm" href="#" target="_blank" rel="noopener">
+                Download PDF
+              </a>
+            </div>
+
+            <hr class="my-4">
+
+            <div id="content" class="lesson-content"></div>
+
+            <div class="mt-4 ad-slot" data-ad-slot="in_content" data-ad-index="1"></div>
+
+            <div class="mt-6 flex flex-wrap gap-2">
+              <button id="completeBtn" class="px-4 py-2 rounded bg-green-600 text-white">Mark as Complete</button>
+              <a id="quizBtn" class="px-4 py-2 rounded bg-blue-600 text-white" href="#">Take Quiz</a>
+            </div>
+
+            <div class="mt-4 ad-slot" data-ad-slot="before_quiz"></div>
+          </div>
+        </article>
+
+        <div class="mt-4 ad-slot" data-ad-slot="footer"></div>
+      </section>
+
+      <aside class="sidebar-right">
+        <div class="ad-slot" data-ad-slot="sidebar_top"></div>
+
+        <div class="mt-4 p-3 rounded bg-white border border-slate-200">
+          <h3 class="font-semibold">Day Grid</h3>
+          <div id="dayGrid" class="mt-3 grid grid-cols-6 gap-2 text-xs"></div>
+          <p class="mt-3 text-xs text-slate-600">Bangla: Locked day = 🔒</p>
+        </div>
+
+        <div class="mt-4 ad-slot" data-ad-slot="sidebar_bottom"></div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="sticky-bottom-wrap">
+    <div class="ad-slot sticky-bottom-ad" data-ad-slot="sticky_bottom"></div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      window.AdManager?.init?.();
+
+      const alertBox = document.getElementById('alert');
+      const show = (ok, msg) => {
+        alertBox.className = 'mb-4 p-3 rounded text-sm ' + (ok ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900');
+        alertBox.textContent = msg;
+        alertBox.classList.remove('hidden');
+      };
+
+      // Support both query and route style: /lesson/{slug}/{day}
+      const parseRoute = () => {
+        const path = location.pathname.replace(/\/+$/, '');
+        const m = path.match(/\/lesson\/([^\/]+)\/(\d+)$/);
+        if (m) return { slug: decodeURIComponent(m[1]), day: Number(m[2]) };
+        const qs = new URLSearchParams(location.search);
+        return { slug: qs.get('course') || '', day: Number(qs.get('day') || 1) };
+      };
+
+      const { slug, day } = parseRoute();
+      const backCourse = document.getElementById('backCourse');
+      const goCourseDetail = document.getElementById('goCourseDetail');
+
+      backCourse.href = `/course-detail.html?course=${encodeURIComponent(slug)}`;
+      goCourseDetail.href = `/course-detail.html?course=${encodeURIComponent(slug)}`;
+
+      const lockedBox = document.getElementById('lockedBox');
+      const lockedReason = document.getElementById('lockedReason');
+      const lessonBox = document.getElementById('lessonBox');
+
+      const titleEl = document.getElementById('title');
+      const metaEl = document.getElementById('meta');
+      const contentEl = document.getElementById('content');
+
+      const crumb = document.getElementById('crumb');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+
+      const completeBtn = document.getElementById('completeBtn');
+      const quizBtn = document.getElementById('quizBtn');
+
+      const videoWrap = document.getElementById('videoWrap');
+      const video = document.getElementById('video');
+      const audioWrap = document.getElementById('audioWrap');
+      const audio = document.getElementById('audio');
+      const pdfWrap = document.getElementById('pdfWrap');
+      const pdf = document.getElementById('pdf');
+
+      const dayGrid = document.getElementById('dayGrid');
+
+      if (!slug) {
+        show(false, 'Course not specified');
+        return;
+      }
+
+      try {
+        const res = await window.API.get(`/api/lessons/get.php?course=${encodeURIComponent(slug)}&day=${day}`);
+        if (!res?.success) throw new Error(res?.message || 'Failed');
+
+        const data = res.data;
+
+        // Progress header info
+        const totalDays = Number(data.course?.total_days || 0);
+        crumb.textContent = `Lesson — ${slug}`;
+        progressText.textContent = `Day ${day} / ${totalDays || '—'}`;
+        progressBar.style.width = totalDays ? `${Math.min(100, Math.round((day / totalDays) * 100))}%` : '0%';
+
+        // Load day grid from progress/course
+        if (window.Auth.isLoggedIn()) {
+          try {
+            const pr = await window.API.get(`/api/progress/course.php?course=${encodeURIComponent(slug)}`);
+            if (pr?.success) {
+              dayGrid.innerHTML = (pr.data.days || []).map(d => {
+                const locked = Number(d.locked) === 1;
+                const done = Number(d.lesson_completed) === 1 && Number(d.quiz_passed) === 1;
+                const cls = done ? 'bg-green-100 border-green-300 text-green-900'
+                          : locked ? 'bg-slate-100 border-slate-200 text-slate-500'
+                          : 'bg-white border-slate-200 hover:border-blue-400';
+                const label = locked ? `${d.day_number}🔒` : `${d.day_number}`;
+                const href = locked ? '#' : `/lesson.html?course=${encodeURIComponent(slug)}&day=${d.day_number}`;
+                return `<a class="day-chip ${cls}" href="${href}" ${locked ? `onclick="event.preventDefault();"` : ''}>${label}</a>`;
+              }).join('');
+            }
+          } catch (e) {}
+        }
+
+        if (data.locked) {
+          lockedBox.classList.remove('hidden');
+          lockedReason.textContent = data.locked_reason || 'Locked';
+          return;
+        }
+
+        lessonBox.classList.remove('hidden');
+
+        titleEl.textContent = `Day ${data.lesson.day_number} — ${data.lesson.title}`;
+        metaEl.innerHTML = `
+          <span class="px-2 py-1 rounded bg-slate-100 border border-slate-200">Estimated: ${Number(data.lesson.estimated_minutes || 0)} min</span>
+          <span class="px-2 py-1 rounded bg-slate-100 border border-slate-200">Quiz pass: ≥60%</span>
+        `;
+
+        // Content: backend stores HTML; insert as-is
+        contentEl.innerHTML = data.lesson.content || '';
+
+        const v = data.lesson.video_url || '';
+        if (v) {
+          videoWrap.classList.remove('hidden');
+          video.src = v;
+        }
+        const a = data.lesson.audio_url || '';
+        if (a) {
+          audioWrap.classList.remove('hidden');
+          audio.src = a;
+        }
+        const p = data.lesson.pdf_url || '';
+        if (p) {
+          pdfWrap.classList.remove('hidden');
+          pdf.href = p;
+        }
+
+        // Buttons
+        quizBtn.href = `/quiz.html?course=${encodeURIComponent(slug)}&day=${day}`;
+
+        const alreadyCompleted = Number(data.progress?.lesson_completed || 0) === 1;
+        if (alreadyCompleted) {
+          completeBtn.textContent = 'Lesson Completed ✅';
+          completeBtn.disabled = true;
+          completeBtn.classList.add('opacity-70');
+        }
+
+        completeBtn.addEventListener('click', async () => {
+          if (!window.Auth.isLoggedIn()) {
+            show(false, 'Please login first');
+            return setTimeout(() => location.href = '/login.html', 600);
+          }
+          completeBtn.disabled = true;
+          completeBtn.textContent = 'Saving...';
+          try {
+            const r = await window.API.post('/api/lessons/complete.php', { course: slug, day });
+            if (!r?.success) throw new Error(r?.message || 'Failed');
+            show(true, 'Marked as complete!');
+            completeBtn.textContent = 'Lesson Completed ✅';
+          } catch (e) {
+            completeBtn.disabled = false;
+            completeBtn.textContent = 'Mark as Complete';
+            show(false, e.message || 'Failed');
+          }
+        });
+
+      } catch (e) {
+        show(false, e.message || 'Failed to load lesson');
+      }
+    });
+  </script>
+</body>
+</html>
